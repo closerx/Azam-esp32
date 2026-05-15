@@ -183,21 +183,22 @@
     </div>
 
     <script>
-        // الإعدادات المحدثة بالكامل المتوافقة مع بنية HiveMQ Cloud
+        // الإعدادات السحابية المحدثة بالكامل لـ HiveMQ Cloud
         var broker = "c9fd45809c6e4d5787a6c3caec263b77.s1.eu.hivemq.cloud";
         var port = 8884; 
-        var path = "/mqtt"; // إضافة المسار الإجباري للسيرفر السحابي الخاص بـ HiveMQ
+        var path = "/mqtt"; 
         var clientId = "web_azm_" + parseInt(Math.random() * 10000, 10);
         
-        var mqtt_user = "hivemq.webclient.1778874002499";
-        var mqtt_pass = "HC$9dtDeT,Zw>5:3Sb8r";
+        // استخدام بيانات الاعتماد الجديدة الخاصة بك
+        var mqtt_user = "closerx";
+        var mqtt_pass = "Hadi@1w2w3w";
 
-        // تحديث استدعاء الـ Client ليشمل متغير الـ path
+        // بناء العميل الرقمي
         var client = new Paho.MQTT.Client(broker, Number(port), path, clientId);
         var statusBadge = document.getElementById("status");
         var ballVisual = document.getElementById("ballVisual");
 
-        // دالة استقبال البيانات
+        // استلام وتوزيع البيانات الواردة
         client.onMessageArrived = function(message) {
             if(message.destinationName === "healthball/patient1/power") {
                 var powerValue = parseInt(message.payloadString, 10) || 0;
@@ -223,13 +224,13 @@
             setTimeout(connectMQTT, 3000);
         };
 
-        // دالة الاتصال المحدثة بالكامل
+        // تفعيل قنوات الأمان السحابية WSS الموثقة
         function connectMQTT() {
             var options = {
-                useSSL: true,        // تشفير WSS إجباري
+                useSSL: true,        
                 userName: mqtt_user,
                 password: mqtt_pass,
-                timeout: 3,          // مهلة زمنية للاتصال لتفادي التعليق البرمجي
+                timeout: 5,          
                 cleanSession: true,
                 onSuccess: function() {
                     statusBadge.className = "status-badge connected";
