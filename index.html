@@ -183,26 +183,26 @@
     </div>
 
     <script>
-        // الإعدادات الجديدة المحدثة لسيرفر HiveMQ Cloud الخاص بك
+        // الإعدادات المحدثة بالكامل المتوافقة مع بنية HiveMQ Cloud
         var broker = "c9fd45809c6e4d5787a6c3caec263b77.s1.eu.hivemq.cloud";
-        var port = 8884; // منفذ الـ WebSockets المشفر والإجباري في خوادم HiveMQ السحابية
+        var port = 8884; 
+        var path = "/mqtt"; // إضافة المسار الإجباري للسيرفر السحابي الخاص بـ HiveMQ
         var clientId = "web_azm_" + parseInt(Math.random() * 10000, 10);
         
-        // بيانات الحساب الخاص بك للتصريح بالدخول
         var mqtt_user = "hivemq.webclient.1778874002499";
         var mqtt_pass = "HC$9dtDeT,Zw>5:3Sb8r";
 
-        var client = new Paho.MQTT.Client(broker, Number(port), clientId);
+        // تحديث استدعاء الـ Client ليشمل متغير الـ path
+        var client = new Paho.MQTT.Client(broker, Number(port), path, clientId);
         var statusBadge = document.getElementById("status");
         var ballVisual = document.getElementById("ballVisual");
 
-        // دالة استقبال الرسائل وتحديث البيانات والرسومات
+        // دالة استقبال البيانات
         client.onMessageArrived = function(message) {
             if(message.destinationName === "healthball/patient1/power") {
                 var powerValue = parseInt(message.payloadString, 10) || 0;
                 document.getElementById("powerDisplay").innerText = powerValue + "%";
                 
-                // منطق تغيير شكل وحالة الكرة التفاعلية بناءً على القوة الحالية
                 if(powerValue > 0) {
                     ballVisual.innerHTML = '<i class="fas fa-hand-fist"></i>';
                     ballVisual.className = "ball-icon pressing";
@@ -217,19 +217,20 @@
             }
         };
 
-        // إدارة انقطاع الاتصال وإعادة المحاولة
         client.onConnectionLost = function(responseObject) {
             statusBadge.className = "status-badge";
             statusBadge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> انقطع الاتصال، جاري المحاولة..';
             setTimeout(connectMQTT, 3000);
         };
 
-        // دالة بدء الاتصال والاشتراك بالقنوات مع تفعيل خيارات الأمان والـ SSL
+        // دالة الاتصال المحدثة بالكامل
         function connectMQTT() {
             var options = {
-                useSSL: true, // تفعيل التشفير والاتصال الآمن WSS
+                useSSL: true,        // تشفير WSS إجباري
                 userName: mqtt_user,
                 password: mqtt_pass,
+                timeout: 3,          // مهلة زمنية للاتصال لتفادي التعليق البرمجي
+                cleanSession: true,
                 onSuccess: function() {
                     statusBadge.className = "status-badge connected";
                     statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> متصل بالسيرفر السحابي عزم';
@@ -237,7 +238,7 @@
                     client.subscribe("healthball/patient1/reps");
                 },
                 onFailure: function(message) {
-                    console.log("Connection failed: " + message.errorMessage);
+                    console.log("Error Details:", message);
                     statusBadge.className = "status-badge";
                     statusBadge.innerHTML = '<i class="fas fa-times-circle"></i> فشل الاتصال، جاري إعادة المحاولة..';
                     setTimeout(connectMQTT, 5000);
@@ -247,7 +248,6 @@
             client.connect(options);
         }
 
-        // تشغيل الاتصال تلقائياً عند فتح الصفحة
         connectMQTT();
     </script>
 </body>
